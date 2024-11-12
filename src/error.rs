@@ -1,6 +1,7 @@
 //! Errors for the SenseHat Screen.
 #[cfg(feature = "linux-framebuffer")]
 use framebuffer::FramebufferError;
+use std::fmt::Display;
 #[cfg(feature = "fonts")]
 use std::string::FromUtf16Error;
 
@@ -12,6 +13,19 @@ pub enum ScreenError {
     #[cfg(feature = "fonts")]
     Unicode(FromUtf16Error),
 }
+
+impl Display for ScreenError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            #[cfg(feature = "linux-framebuffer")]
+            ScreenError::Framebuffer(err) => write!(f, "Framebuffer error: {}", err),
+            #[cfg(feature = "fonts")]
+            ScreenError::Unicode(err) => write!(f, "Unicode error: {}", err),
+        }
+    }
+}
+
+impl std::error::Error for ScreenError {}
 
 #[cfg(feature = "linux-framebuffer")]
 impl From<FramebufferError> for ScreenError {
